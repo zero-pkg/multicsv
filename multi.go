@@ -14,16 +14,19 @@ func (eofReader) Read() (record []string, err error) {
 	return []string{}, io.EOF
 }
 
-type multiReader struct {
+// MultiReader is the logical concatenation of the provided input readers.
+// They're read sequentially. Once all inputs have returned EOF, Read will return EOF.
+// If any of the readers return a non-nil, non-EOF error, Read will return that error.
+type MultiReader struct {
 	readers []Reader
 }
 
 // Read reads one record (a slice of fields) from the provided input readers.
 // Following code was taken from https://go.dev/src/io/multi.go and adopted to works with csv readers.
-func (mr *multiReader) Read() (record []string, err error) {
+func (mr *MultiReader) Read() (record []string, err error) {
 	for len(mr.readers) > 0 {
 		if len(mr.readers) == 1 {
-			if r, ok := mr.readers[0].(*multiReader); ok {
+			if r, ok := mr.readers[0].(*MultiReader); ok {
 				mr.readers = r.readers
 				continue
 			}
@@ -47,13 +50,29 @@ func (mr *multiReader) Read() (record []string, err error) {
 	return []string{}, io.EOF
 }
 
-// MultiReader returns a Reader that's the logical concatenation of
+// ReadAll reads all the remaining records from the provided input readers.
+func (mr *MultiReader) ReadAll() (records [][]string, err error) {
+	for {
+		record, err := mr.Read()
+		if err == io.EOF {
+			return records, nil
+		}
+
+		if err != nil {
+			return nil, err
+		}
+
+		records = append(records, record)
+	}
+}
+
+// NewReader returns a Reader that's the logical concatenation of
 // the provided input readers. They're read sequentially. Once all
 // inputs have returned EOF, Read will return EOF.  If any of the readers
 // return a non-nil, non-EOF error, Read will return that error.
-func MultiReader(readers ...Reader) Reader {
+func NewReader(readers ...Reader) *MultiReader {
 	r := make([]Reader, len(readers))
 	copy(r, readers)
 
-	return &multiReader{r}
+	return &MultiReader{r}
 }

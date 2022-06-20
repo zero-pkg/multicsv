@@ -5,24 +5,22 @@ import (
 	"testing"
 )
 
-func TestMultiReader(t *testing.T) {
-	r := multiReader{
-		readers: []Reader{
-			&mock{
-				rows: [][]string{
-					{"a", "b", "c"},
-					{"a", "b", "c"},
-					{"a", "b", "c"},
-				},
-			},
-			&mock{},
-			&mock{
-				rows: [][]string{
-					{"d", "e", "f"},
-				},
+func TestMultiReaderRead(t *testing.T) {
+	r := NewReader(
+		&mock{
+			rows: [][]string{
+				{"a", "b", "c"},
+				{"a", "b", "c"},
+				{"a", "b", "c"},
 			},
 		},
-	}
+		&mock{},
+		&mock{
+			rows: [][]string{
+				{"d", "e", "f"},
+			},
+		},
+	)
 
 	var (
 		cnt int
@@ -42,25 +40,36 @@ func TestMultiReader(t *testing.T) {
 	equals(t, err, io.EOF)
 }
 
+func TestMultiReaderReadAll(t *testing.T) {
+	r := NewReader(
+		&mock{
+			rows: [][]string{
+				{"a", "b", "c"},
+				{"a", "b", "c"},
+				{"a", "b", "c"},
+			},
+		},
+		&mock{},
+		&mock{
+			rows: [][]string{
+				{"d", "e", "f"},
+			},
+		},
+	)
+
+	records, err := r.ReadAll()
+
+	equals(t, 4, len(records))
+	ok(t, err)
+}
+
 func TestMultiReaderEmpty(t *testing.T) {
-	r := multiReader{
+	r := MultiReader{
 		readers: []Reader{},
 	}
 
-	var (
-		cnt int
-		err error
-	)
+	records, err := r.ReadAll()
 
-	for {
-		_, err = r.Read()
-		if err != nil {
-			break
-		}
-
-		cnt++
-	}
-
-	equals(t, 0, cnt)
-	equals(t, err, io.EOF)
+	equals(t, 0, len(records))
+	ok(t, err)
 }
