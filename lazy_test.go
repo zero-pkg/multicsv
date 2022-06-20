@@ -8,7 +8,7 @@ import (
 
 func TestLazyReader(t *testing.T) {
 	r := &LazyReader{
-		ReaderFunc: func() (*csv.Reader, error) {
+		Init: func() (*csv.Reader, error) {
 			f, err := os.Open("testdata/custom.csv")
 			ok(t, err)
 
@@ -39,6 +39,25 @@ func TestLazyReader(t *testing.T) {
 }
 
 func TestLazyFileReader(t *testing.T) {
+	r := LazyFileReader("testdata/basic.csv", false)
+
+	var cnt int
+
+	for {
+		fields, err := r.Read()
+		if err != nil {
+			break
+		}
+
+		cnt++
+
+		equals(t, 6, len(fields))
+	}
+
+	equals(t, 6, cnt)
+}
+
+func TestLazyFileReaderSkipHeader(t *testing.T) {
 	r := LazyFileReader("testdata/basic.csv", true)
 
 	var cnt int
@@ -55,4 +74,11 @@ func TestLazyFileReader(t *testing.T) {
 	}
 
 	equals(t, 5, cnt)
+}
+
+func TestLazyFileReaderError(t *testing.T) {
+	r := LazyFileReader("testdata/nonexists.csv", true)
+
+	_, err := r.Read()
+	assert(t, err != nil, "err is nil")
 }

@@ -6,17 +6,21 @@ import (
 	"sync"
 )
 
+// LazyReader allows delayed opening of a resource.
+// It can be used to delay opening a resource until the resource is actually read.
 type LazyReader struct {
-	ReaderFunc ReaderFunc
-	once       sync.Once
-	reader     *csv.Reader
+	Init   InitFunc
+	once   sync.Once
+	reader *csv.Reader
 }
 
-type ReaderFunc func() (*csv.Reader, error)
+// InitFunc is called during the first time reading from LazyReader
+type InitFunc func() (*csv.Reader, error)
 
+// Read calls Read func from reader that will be returned by InitFunc.
 func (r *LazyReader) Read() (record []string, err error) {
 	r.once.Do(func() {
-		r.reader, err = r.ReaderFunc()
+		r.reader, err = r.Init()
 	})
 
 	if err != nil {
@@ -26,9 +30,11 @@ func (r *LazyReader) Read() (record []string, err error) {
 	return r.reader.Read()
 }
 
+// LazyFileReader returns a LazyReader with a predefined InitFunc, which can be used in most cases.
+// Optionally supports the CSV header skip option.
 func LazyFileReader(filepath string, skipHeader bool) Reader {
 	return &LazyReader{
-		ReaderFunc: func() (*csv.Reader, error) {
+		Init: func() (*csv.Reader, error) {
 			f, err := os.Open(filepath)
 			if err != nil {
 				return nil, err
