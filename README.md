@@ -4,7 +4,9 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/zero-pkg/multicsv)](https://goreportcard.com/report/github.com/zero-pkg/multicsv)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/zero-pkg/multicsv/blob/master/LICENSE)
 
-Provides helpers on top of `html/template` to dynamically parse all templates from the specific directory and provides a unified interface for accessing them. In addition, the package provides the ability to use the Jinja2/Django like `{{ extends }}` tag.
+MultiCSV is a multi reader that's the logical concatenation of the provided input csv readers.
+They're read sequentially. Once all inputs have returned EOF, Read will return EOF.
+If any of the readers return a non-nil, non-EOF error, Read will return that error.
 
 ## Install and update
 
