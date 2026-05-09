@@ -35,7 +35,7 @@ func (r *LazyReader) Read() (record []string, err error) {
 func LazyFileReader(filepath string, skipHeader bool) Reader {
 	return &LazyReader{
 		Init: func() (*csv.Reader, error) {
-			f, err := os.Open(filepath)
+			f, err := os.Open(filepath) //nolint:gosec
 			if err != nil {
 				return nil, err
 			}

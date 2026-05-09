@@ -1,18 +1,17 @@
 # multicsv
 
 [![build](https://github.com/zero-pkg/multicsv/actions/workflows/ci.yml/badge.svg)](https://github.com/zero-pkg/multicsv/actions/workflows/ci.yml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/zero-pkg/multicsv)](https://goreportcard.com/report/github.com/zero-pkg/multicsv)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/zero-pkg/multicsv/blob/master/LICENSE)
 
-MultiCSV is a multi reader that's the logical concatenation of the provided input csv readers.
-They're read sequentially. Once all inputs have returned EOF, Read will return EOF.
-If any of the readers return a non-nil, non-EOF error, Read will return that error.
+MultiCSV is a multi-reader that provides the logical concatenation of the input CSV readers.
+The readers are read sequentially. Once all inputs have returned `EOF`, `Read` returns `EOF`.
+If any reader returns a non-nil, non-EOF error, `Read` returns that error.
 
-## Install and update
+## Installation
 
 `go get -u github.com/zero-pkg/multicsv`
 
-## How to use
+## Usage
 
 ```go
 r := multicsv.NewReader(
@@ -28,7 +27,7 @@ if err != nil {
 fmt.Println(records)
 ```
 
-## Extending LazyReader
+## Extending `LazyReader`
 
 ```go
 func main() {
@@ -36,6 +35,7 @@ func main() {
 		customReader("data/count_10.csv"),
 		customReader("data/count_100.csv"),
 	)
+	_ = r
 }
 
 func customReader(file string) *multicsv.LazyReader {
@@ -46,7 +46,7 @@ func customReader(file string) *multicsv.LazyReader {
 				return nil, err
 			}
 
-			// customize csv.Reader
+			// Customize csv.Reader.
 			r := csv.NewReader(f)
 			r.LazyQuotes = true
 
@@ -58,4 +58,4 @@ func customReader(file string) *multicsv.LazyReader {
 
 ## License
 
-http://www.opensource.org/licenses/mit-license.php
+[MIT](https://opensource.org/license/mit)

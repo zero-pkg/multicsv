@@ -4,6 +4,7 @@ import (
 	"io"
 )
 
+// Reader is an interface that wraps the basic Read method.
 type Reader interface {
 	Read() (record []string, err error)
 }
