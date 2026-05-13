@@ -8,8 +8,8 @@ import (
 
 func main() {
 	r := multicsv.NewReader(
-		multicsv.LazyFileReader("data/users.csv", multicsv.WithSkipHeader()),
-		multicsv.LazyFileReader("data/users2.csv", multicsv.WithSkipHeader()),
+		multicsv.LazyFileReader("data/users.csv", multicsv.WithSkipHeader(), multicsv.WithAutoDetectDelimiter()),
+		multicsv.LazyFileReader("data/users2.csv", multicsv.WithSkipHeader(), multicsv.WithAutoDetectDelimiter()),
 	)
 
 	records, err := r.ReadAll()
@@ -17,5 +17,7 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println(records)
+	for _, record := range records {
+		fmt.Printf("%+v\n", record)
+	}
 }

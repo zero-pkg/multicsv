@@ -43,6 +43,14 @@ func LazyFileReader(filepath string, opts ...ReaderOption) Reader {
 			}
 
 			r := csv.NewReader(f)
+			if options.autoDetectDelimiter {
+				delimiter, err := detectDelimiter(f)
+				if err != nil {
+					return nil, err
+				}
+
+				r.Comma = delimiter
+			}
 
 			if options.skipHeader {
 				if _, err := r.Read(); err != nil {

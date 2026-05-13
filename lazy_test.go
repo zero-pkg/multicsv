@@ -76,6 +76,37 @@ func TestLazyFileReaderSkipHeader(t *testing.T) {
 	equals(t, 5, cnt)
 }
 
+func TestLazyFileReaderAutoDetectDelimiter(t *testing.T) {
+	r := LazyFileReader("testdata/semicolon.csv", WithAutoDetectDelimiter(), WithSkipHeader())
+
+	records, err := NewReader(r).ReadAll()
+	ok(t, err)
+
+	equals(t, [][]string{
+		{"Ann", "Moscow", "likes, commas"},
+		{"Bob", "Berlin", "uses; semicolons"},
+	}, records)
+}
+
+func TestLazyFileReaderAutoDetectDelimiterKeepsComma(t *testing.T) {
+	r := LazyFileReader("testdata/basic.csv", WithAutoDetectDelimiter())
+
+	var cnt int
+
+	for {
+		fields, err := r.Read()
+		if err != nil {
+			break
+		}
+
+		cnt++
+
+		equals(t, 6, len(fields))
+	}
+
+	equals(t, 6, cnt)
+}
+
 func TestLazyFileReaderError(t *testing.T) {
 	r := LazyFileReader("testdata/nonexists.csv")
 

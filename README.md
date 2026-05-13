@@ -27,6 +27,14 @@ if err != nil {
 fmt.Println(records)
 ```
 
+Use `WithAutoDetectDelimiter` when a file can use a common delimiter such as `,`, `;`, tab, or `|`:
+
+```go
+r := multicsv.NewReader(
+    multicsv.LazyFileReader("data/users.csv", multicsv.WithAutoDetectDelimiter()),
+)
+```
+
 ## Extending `LazyReader`
 
 ```go

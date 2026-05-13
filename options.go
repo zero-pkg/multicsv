@@ -4,7 +4,8 @@ package multicsv
 type ReaderOption func(*readerOptions)
 
 type readerOptions struct {
-	skipHeader bool
+	skipHeader          bool
+	autoDetectDelimiter bool
 }
 
 func newReaderOptions(opts ...ReaderOption) readerOptions {
@@ -20,5 +21,12 @@ func newReaderOptions(opts ...ReaderOption) readerOptions {
 func WithSkipHeader() ReaderOption {
 	return func(o *readerOptions) {
 		o.skipHeader = true
+	}
+}
+
+// WithAutoDetectDelimiter detects the CSV delimiter before reading data.
+func WithAutoDetectDelimiter() ReaderOption {
+	return func(o *readerOptions) {
+		o.autoDetectDelimiter = true
 	}
 }
