@@ -15,8 +15,8 @@ If any reader returns a non-nil, non-EOF error, `Read` returns that error.
 
 ```go
 r := multicsv.NewReader(
-    multicsv.LazyFileReader("data/users.csv", true),
-    multicsv.LazyFileReader("data/users2.csv", true),
+    multicsv.LazyFileReader("data/users.csv"),
+    multicsv.LazyFileReader("data/users2.csv", multicsv.WithSkipHeader()),
 )
 
 records, err := r.ReadAll()

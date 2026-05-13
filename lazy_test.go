@@ -39,7 +39,7 @@ func TestLazyReader(t *testing.T) {
 }
 
 func TestLazyFileReader(t *testing.T) {
-	r := LazyFileReader("testdata/basic.csv", false)
+	r := LazyFileReader("testdata/basic.csv")
 
 	var cnt int
 
@@ -58,7 +58,7 @@ func TestLazyFileReader(t *testing.T) {
 }
 
 func TestLazyFileReaderSkipHeader(t *testing.T) {
-	r := LazyFileReader("testdata/basic.csv", true)
+	r := LazyFileReader("testdata/basic.csv", WithSkipHeader())
 
 	var cnt int
 
@@ -77,7 +77,7 @@ func TestLazyFileReaderSkipHeader(t *testing.T) {
 }
 
 func TestLazyFileReaderError(t *testing.T) {
-	r := LazyFileReader("testdata/nonexists.csv", true)
+	r := LazyFileReader("testdata/nonexists.csv")
 
 	_, err := r.Read()
 	assert(t, err != nil, "err is nil")

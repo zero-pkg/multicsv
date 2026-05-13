@@ -32,7 +32,9 @@ func (r *LazyReader) Read() (record []string, err error) {
 
 // LazyFileReader returns a LazyReader with a predefined InitFunc, which can be used in most cases.
 // Optionally supports the CSV header skip option.
-func LazyFileReader(filepath string, skipHeader bool) Reader {
+func LazyFileReader(filepath string, opts ...ReaderOption) Reader {
+	options := newReaderOptions(opts...)
+
 	return &LazyReader{
 		Init: func() (*csv.Reader, error) {
 			f, err := os.Open(filepath) //nolint:gosec
@@ -42,7 +44,7 @@ func LazyFileReader(filepath string, skipHeader bool) Reader {
 
 			r := csv.NewReader(f)
 
-			if skipHeader {
+			if options.skipHeader {
 				if _, err := r.Read(); err != nil {
 					return nil, err
 				}
