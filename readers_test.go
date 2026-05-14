@@ -2,7 +2,10 @@ package multicsv
 
 import (
 	"encoding/csv"
+	"errors"
+	"io"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -36,6 +39,48 @@ func TestLazyReader(t *testing.T) {
 	}
 
 	equals(t, 10, cnt)
+}
+
+func TestLazyReaderClosesOnEOF(t *testing.T) {
+	var closeCount int
+
+	r := &LazyReader{
+		Init: func() (*csv.Reader, error) {
+			return csv.NewReader(strings.NewReader("a,b\n")), nil
+		},
+		CloseFunc: func() error {
+			closeCount++
+
+			return nil
+		},
+	}
+
+	record, err := r.Read()
+	ok(t, err)
+	equals(t, []string{"a", "b"}, record)
+
+	_, err = r.Read()
+	equals(t, io.EOF, err)
+	equals(t, 1, closeCount)
+
+	_, err = r.Read()
+	equals(t, io.EOF, err)
+	equals(t, 1, closeCount)
+}
+
+func TestLazyReaderInitErrorIsStable(t *testing.T) {
+	expectedErr := errors.New("init failed")
+	r := &LazyReader{
+		Init: func() (*csv.Reader, error) {
+			return nil, expectedErr
+		},
+	}
+
+	_, err := r.Read()
+	assert(t, errors.Is(err, expectedErr), "expected init error, got %v", err)
+
+	_, err = r.Read()
+	assert(t, errors.Is(err, expectedErr), "expected init error, got %v", err)
 }
 
 func TestLazyFileReader(t *testing.T) {

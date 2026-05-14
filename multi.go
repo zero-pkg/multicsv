@@ -1,6 +1,7 @@
 package multicsv
 
 import (
+	"errors"
 	"io"
 )
 
@@ -35,8 +36,13 @@ func (mr *MultiReader) Read() (record []string, err error) {
 
 		record, err = mr.readers[0].Read()
 		if err == io.EOF {
+			closeErr := closeReader(mr.readers[0])
 			mr.readers[0] = eofReader{} // permit earlier GC
 			mr.readers = mr.readers[1:]
+
+			if closeErr != nil {
+				return nil, closeErr
+			}
 		}
 
 		if len(record) > 0 || err != io.EOF {
@@ -53,6 +59,12 @@ func (mr *MultiReader) Read() (record []string, err error) {
 
 // ReadAll reads all the remaining records from the provided input readers.
 func (mr *MultiReader) ReadAll() (records [][]string, err error) {
+	defer func() {
+		if closeErr := mr.Close(); err == nil && closeErr != nil {
+			err = closeErr
+		}
+	}()
+
 	for {
 		record, err := mr.Read()
 		if err == io.EOF {
@@ -76,4 +88,26 @@ func NewReader(readers ...Reader) *MultiReader {
 	copy(r, readers)
 
 	return &MultiReader{r}
+}
+
+// Close closes all remaining readers that implement io.Closer.
+func (mr *MultiReader) Close() error {
+	var err error
+
+	for _, r := range mr.readers {
+		err = errors.Join(err, closeReader(r))
+	}
+
+	mr.readers = nil
+
+	return err
+}
+
+func closeReader(r Reader) error {
+	c, ok := r.(io.Closer)
+	if !ok {
+		return nil
+	}
+
+	return c.Close()
 }

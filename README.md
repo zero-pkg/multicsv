@@ -18,6 +18,7 @@ r := multicsv.NewReader(
     multicsv.LazyFileReader("data/users.csv"),
     multicsv.LazyFileReader("data/users2.csv", multicsv.WithSkipHeader()),
 )
+defer r.Close()
 
 records, err := r.ReadAll()
 if err != nil {
@@ -31,7 +32,7 @@ You can also read CSV data from bytes with the same options:
 
 ```go
 r := multicsv.NewReader(
-    multicsv.BytesReader(data, multicsv.WithSkipHeader(), multicsv.WithAutoDetectDelimiter()),
+    multicsv.BytesReader(data, multicsv.WithSkipHeader()),
 )
 ```
 
@@ -54,10 +55,12 @@ func main() {
 	_ = r
 }
 
-func customReader(file string) *multicsv.LazyReader {
+func customReader(path string) *multicsv.LazyReader {
+	var file *os.File
+
 	return &multicsv.LazyReader{
 		Init: func() (*csv.Reader, error) {
-			f, err := os.Open(file)
+			f, err := os.Open(path)
 			if err != nil {
 				return nil, err
 			}
@@ -65,8 +68,16 @@ func customReader(file string) *multicsv.LazyReader {
 			// Customize csv.Reader.
 			r := csv.NewReader(f)
 			r.LazyQuotes = true
+			file = f
 
 			return r, nil
+		},
+		CloseFunc: func() error {
+			if file == nil {
+				return nil
+			}
+
+			return file.Close()
 		},
 	}
 }

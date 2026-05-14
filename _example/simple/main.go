@@ -11,6 +11,7 @@ func main() {
 		multicsv.LazyFileReader("data/users.csv", multicsv.WithSkipHeader(), multicsv.WithAutoDetectDelimiter()),
 		multicsv.LazyFileReader("data/users2.csv", multicsv.WithSkipHeader(), multicsv.WithAutoDetectDelimiter()),
 	)
+	defer r.Close()
 
 	records, err := r.ReadAll()
 	if err != nil {
