@@ -1,6 +1,6 @@
 package multicsv
 
-// ReaderOption changes the default LazyFileReader behavior.
+// ReaderOption changes the default reader behavior.
 type ReaderOption func(*readerOptions)
 
 type readerOptions struct {

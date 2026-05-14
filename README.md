@@ -27,6 +27,14 @@ if err != nil {
 fmt.Println(records)
 ```
 
+You can also read CSV data from bytes with the same options:
+
+```go
+r := multicsv.NewReader(
+    multicsv.BytesReader(data, multicsv.WithSkipHeader(), multicsv.WithAutoDetectDelimiter()),
+)
+```
+
 Use `WithAutoDetectDelimiter` when a file can use a common delimiter such as `,`, `;`, tab, or `|`:
 
 ```go
